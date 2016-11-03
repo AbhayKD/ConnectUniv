@@ -1,0 +1,220 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="cu-elements.html">
+<link rel="import" href="cu-toolbar.html">
+<link rel="import" href="cu-icons.html">
+<link rel="import" href="cu-login.html">
+<link rel="import" href="cu-behavior.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/app-storage/app-network-status-behavior.html">
+
+<dom-module id="cu-app">
+
+  <template>
+
+    <style>
+
+      :host {
+        display: block;
+        --app-primary-color: #4285f4;
+        --app-secondary-color: black;
+
+      }
+
+      app-header {
+        background-color: var(--app-primary-color);
+        color: #fff;
+      }
+      app-header paper-icon-button {
+        --paper-icon-button-ink-color: white;
+      }
+
+      .drawer-list {
+        margin: 0 20px;
+      }
+      .drawer-list a {
+        display: block;
+        padding: 0 16px;
+        line-height: 40px;
+        text-decoration: none;
+        color: var(--app-secondary-color);
+      }
+      .drawer-list a.iron-selected {
+        color: black;
+        font-weight: bold;
+      }
+      .drawer-list a.subroute {
+        padding-left: 32px;
+      }
+
+    .view {
+     position: fixed;
+     top: 0;
+     left: 0;
+     width: 100%;
+     height: 170px;
+     color: #fff;
+     background-color: #4285f4;
+     --app-header-background-front-layer: {
+       background-image: url(//app-layout-assets.appspot.com/assets/bg1.jpg);
+       background-position: left center;
+     };
+
+   }
+   app-toolbar.tall {
+     height: 150px;
+   }
+   [main-title] {
+     font-weight: lighter;
+     margin-left: 350px;
+     margin-bottom: 130px;
+   }
+   [condensed-title] {
+     font-weight: lighter;
+     margin-left: 30px;
+     overflow: hidden;
+     text-overflow: ellipsis;
+   }
+   [condensed-title] i {
+     font-weight: 100;
+     font-style: normal;
+   }
+   @media (max-width: 639px) {
+     [main-title] {
+       margin-left: 50px;
+       font-size: 30px;
+     }
+     [condensed-title] {
+       font-size: 15px;
+     }
+   }
+
+   cu-login{
+     @apply(--layout-horizontal);
+     @apply(--layout-end-justified);
+   }
+
+
+
+    </style>
+
+    <firebase-auth
+      id="auth"
+      app-name="Connectuni"
+      provider="google"
+      signed-in="{{signedIn}}"
+      user="{{user}}">
+    </firebase-auth>
+
+    <app-location route="{{route}}"></app-location>
+    <app-route
+        route="{{route}}"
+        pattern="/:page"
+        data="{{routeData}}"
+        tail="{{subroute}}"></app-route>
+
+    <app-drawer-layout fullbleed>
+
+      <!-- Drawer content -->
+      <app-drawer>
+        <app-header effects="waterfall">
+          <app-toolbar>Menu</app-toolbar>
+        </app-header>
+        <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
+          <a name="view1" href="/view1">View One</a>
+          <a name="view2" href="/view2">View Two</a>
+          <a name="view3" href="/view3">View Three</a>
+        </iron-selector>
+      </app-drawer>
+
+      <!-- Main content -->
+      <app-header-layout has-scrolling-region>
+
+        <app-header  class="view" condenses reveals effects="waterfall resize-title blend-background parallax-background">
+          <app-toolbar>
+            <h4 condensed-title>ConnectUni&mdash; News-Feed</h4>
+            <cu-toolbar
+              signed-in="[[signedIn]]"
+              on-sign-out="signOut">
+            </cu-toolbar>
+            <cu-login
+              on-sign-in="signIn"
+              signed-in="[[signedIn]]"
+              disabled="[[!online]]">
+            </cu-login>
+          </app-toolbar>
+          <app-toolbar class="tall">
+            <h1 main-title>ConnectUni</h1>
+          </app-toolbar>
+        </app-header>
+
+        <iron-pages role="main" selected="[[page]]" attr-for-selected="name">
+          <cu-view1 user={{user}} name="view1"></cu-view1>
+          <cu-view2 name="view2"></cu-view2>
+          <cu-view3 name="view3"></cu-view3>
+        </iron-pages>
+
+      </app-header-layout>
+
+    </app-drawer-layout>
+
+  </template>
+
+  <script>
+
+    Polymer({
+
+      is: 'cu-app',
+
+      behaviors: [Polymer.CUAppBehavior],
+
+      properties: {
+
+        page: {
+          type: String,
+          reflectToAttribute: true,
+          observer: '_pageChanged'
+        },
+        signedIn: {
+          type: Boolean,
+          notify: true,
+          value: false
+        },
+        disabled: {
+          type: Boolean,
+          reflectToAttribute: true,
+          value: false
+        }
+
+      },
+
+      observers: [
+        '_routePageChanged(routeData.page)'
+      ],
+
+      signIn: function() {
+        this.$.auth.signInWithPopup();
+      },
+
+      _routePageChanged: function(page) {
+        this.page = page || 'view1';
+      },
+
+      _pageChanged: function(page) {
+        // load page import on demand.
+        this.importHref(
+          this.resolveUrl('cu-' + page + '.html'), null, null, true);
+      }
+    });
+
+  </script>
+
+</dom-module>

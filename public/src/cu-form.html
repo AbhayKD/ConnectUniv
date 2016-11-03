@@ -1,0 +1,109 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="cu-icons.html">
+<link rel="import" href="cu-behavior.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../resources/styles/typography.html">
+<link rel="import" href="../resources/styles/color.html">
+
+<dom-module id="cu-form">
+
+  <template>
+
+    <style>
+      :host {
+        display: block;
+        padding: 10px;
+      }
+
+      h1 {
+        --paper-font-title;
+        font-weight:100;
+        align: center;
+        margin: auto;
+        padding:0.8em 0 1em 0;
+        max-width:225px;
+      }
+
+      paper-input{
+        width:auto;
+      }
+
+      paper-textarea{
+        width:auto;
+      }
+      .buttonGroup{
+        max-width:190px;
+        margin:3em auto 0 auto;
+        padding-bottom:1.5em;
+      }
+
+      paper-button.custom{
+        background-color: var(--paper-indigo-500);
+        color: white;
+      }
+    </style>
+      <paper-input label="Title" value="{{title}}" autocapitalize></paper-input><br>
+      <paper-textarea label="Description" value="{{body}}"></paper-textarea><br>
+      <div class="buttonGroup">
+        <paper-button id="save" class="custom" raised on-tap="save">Submit</paper-button>
+      </div>
+      <div>{{title}}</div><br>
+      <div>{{body}}</div>
+
+  </template>
+
+  <script>
+
+    Polymer({
+
+      is: 'cu-form',
+
+      behaviors: [Polymer.CUAppBehavior],
+
+      properties: {
+        note: {
+          type: Object,
+          notify: true
+        },
+        title:{
+          type: String,
+          notify: true,
+          reflectToAttribute:true,
+          value:''
+        },
+        body:{
+          type: String,
+          notify:true,
+          reflectToAttribute:true,
+          value:''
+        }
+      },
+
+      save: function() {
+        this.create('save');
+      },
+
+      create: function(detail) {
+        this.note = {title:this.title,body:this.body};
+        console.log(this.note);
+        this.fire('close', detail, { bubbles: false });
+        //console.log("Title:" + this.title + ", " + "Description:" + this.body);
+      }
+    });
+
+  </script>
+
+</dom-module>
